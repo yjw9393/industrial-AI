@@ -1,1 +1,150 @@
-ㅁㅁ
+#pip install durable_rules
+from durable.lang import *
+
+# 간이무기고 - 간이무기고 관리 시스템
+# m.INSTALL(설치)   - 설치 시 일어나는 증상
+# m.BODY(함체)      - 간이무기고 관리 시스템의 기기 본체
+# m.LED1            - 함체의 LED1 색깔
+# m.LED2            - 함체의 LED2 색깔
+# m.NUMBER(순번)    - 정상, 비정상의 순번 분류
+# m.SOUND(소리)     - 비프음 여부
+# m.FPRINT_Mach(지문인식기)
+# m.FPRINT(지문)    - 지문인식기 지문 등록 여부
+# m.TAG(태그)       - RFID 태그 등록 여부
+# m.FINAL(최종)     - 최종 작동 함체
+# m.MATCH(매칭)     - 매칭 여부
+# m.RUN(작동여부)   - 작동 결과
+# m.RESULT(결과)    - 사용 가능 여부
+# m.BODYNUM(함체순번)
+
+
+with ruleset('WEAPONMNG49'):
+    # 1. 함체는 LED가 초록불 + 초록불이면 정상이다. 
+    @when_all((m.INSTALL == 'BODY') & (m.LED1 == 'GREEN') & (m.LED2 == 'GREEN'))
+    def RESULT1(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : 'is', 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 2. 함체는 LED가 초록불 + 빨간불이면 비정상이다. 
+    @when_all((m.INSTALL == 'BODY') & (m.LED1 == 'RED') & (m.LED2 == 'GREEN'))
+    def RESULT2(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 3. 함체는 LED가 빨간불 + 빨간불이면 비정상이다. 
+    @when_all((m.INSTALL == 'BODY') & (m.LED1 == 'RED') & (m.LED2 == 'RED'))
+    def RESULT3(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 4. 함체는 소리가 비프음이면 정상이다. 
+    @when_all((m.INSTALL == 'BODY') & (m.SOUND == 'BEEF'))
+    def RESULT4(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 5. 함체는 소리가 무음이면 비정상이다. 
+    @when_all((m.INSTALL == 'BODY') & (m.SOUND == 'MUTE'))
+    def RESULT5(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 6. PC프로그램은 LED가 초록불 + 초록불이면 정상이다. 
+    @when_all((m.INSTALL == 'PC프로그램') & (m.LED1 == 'GREEN') & (m.LED2 == 'GREEN'))
+    def RESULT6(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 7. PC프로그램은 LED가 초록불 + 빨간불이면 비정상이다. 
+    @when_all((m.INSTALL == 'PC프로그램') & (m.LED1 == 'RED') & (m.LED2 == 'GREEN'))
+    def RESULT7(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 8. PC프로그램은 LED가 빨간불 + 빨간불이면 비정상이다. 
+    @when_all((m.INSTALL == 'PC프로그램') & (m.LED1 == 'RED') & (m.LED2 == 'RED'))
+    def RESULT8(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 9. 지문인식기는 지문이 등록되어있으면 정상이다. 
+    @when_all((m.INSTALL == 'FPRINT_Mach') & (m.FPRINT == 'REGIST'))
+    def RESULT9(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 10. 지문인식기는 지문이 미등록되어있으면 비정상이다. 
+    @when_all((m.INSTALL == 'FPRINT_Mach') & (m.FPRINT == 'N_REGIST'))
+    def RESULT10(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 11. RFID는 태그가 등록되어있으면 정상이다. 
+    @when_all((m.INSTALL == 'RFID') & (m.TAG == 'REGIST'))
+    def RESULT11(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 12. RFID는 태그이 미등록되어있으면 비정상이다. 
+    @when_all((m.INSTALL == 'RFID') & (m.TAG == 'N_REGIST'))
+    def RESULT12(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 13. 최종은 지문과 RFID가 둘 다 등록되어 있으면 정상이다. 
+    @when_all((m.INSTALL == 'FINAL') & (m.FPRINT == 'REGIST') & (m.TAG == 'REGIST'))
+    def RESULT13(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 14. 최종은 지문과 RFID가 둘 다 등록되어 있는데 매칭이 가능하면 정상이다.
+    @when_all((m.INSTALL == 'FINAL') & (m.FPRINT == 'REGIST') & (m.TAG == 'REGIST') & (m.MATCH == 'POSSIBLE'))
+    def RESULT14(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'GOOD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+    # 15. 최종은 지문과 RFID가 둘 다 등록되어 있는데 매칭이 안되면 비정상이다.
+    @when_all((m.INSTALL == 'FINAL') & (m.FPRINT == 'REGIST') & (m.TAG == 'REGIST') & (m.MATCH == 'IMPOSSIBLE'))
+    def RESULT15(c):
+        c.assert_fact({'NUMBER' : c.m.NUMBER, 'BODYNUM' : c.m.BODY, 'RESULT' : 'BAD'})
+        print('작동 전 체크 메뉴얼 : {0}'.format(c.m.NUMBER))
+
+
+    # 결과 출력
+    @when_all(m.RUN == 'GOOD')
+    def 결과출력1(c):
+        print('NUMBER : {0} , INSTALL : {1} , RESULT : GOOD\n'.format(c.m.NUMBER, c.m.BODYNUM))
+
+    @when_all(m.RUN == 'BAD')
+    def 결과출력2(c):
+        print('NUMBER : {0} , INSTALL : {1} , RESULT : BAD\n'.format(c.m.NUMBER, c.m.BODYNUM))
+
+    @when_all(m)
+
+
+    #FACT
+
+    #BODY 함체
+    assert_fact('WEAPONMNG49', {'NUMBER' : '1', 'INSTALL' : 'BODY', 'LED1' : 'GREEN', 'LED2' : 'GREEN'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '2', 'INSTALL' : 'BODY', 'LED1' : 'RED', 'LED2' : 'GREEN'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '3', 'INSTALL' : 'BODY', 'LED1' : 'RED', 'LED2' : 'RED'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '4', 'INSTALL' : 'BODY', 'SOUND' : 'BEEF'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '5', 'INSTALL' : 'BODY', 'SOUND' : 'MUTE'})
+
+    #PC프로그램
+    assert_fact('WEAPONMNG49', {'NUMBER' : '6', 'INSTALL' : 'PC프로그램', 'LED1' : 'GREEN', 'LED2' : 'GREEN'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '7', 'INSTALL' : 'PC프로그램', 'LED1' : 'RED', 'LED2' : 'GREEN'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '8', 'INSTALL' : 'PC프로그램', 'LED1' : 'RED', 'LED2' : 'RED'})
+
+    #FPRINT_Mach 지문인식기
+    assert_fact('WEAPONMNG49', {'NUMBER' : '9', 'INSTALL' : 'FPRINT_Mach', 'FPRINT' : 'REGIST'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '10', 'INSTALL' : 'FPRINT_Mach', 'FPRINT' : 'N_REGIST'})
+
+    #RFID
+    assert_fact('WEAPONMNG49', {'NUMBER' : '11', 'INSTALL' : 'RFID', 'TAG' : 'REGIST'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '12', 'INSTALL' : 'RFID', 'TAG' : 'N_REGIST'})
+
+    #최종
+    assert_fact('WEAPONMNG49', {'NUMBER' : '13', 'INSTALL' : 'FINAL', 'FPRINT' : 'REGIST', 'TAG' : 'REGIST'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '14', 'INSTALL' : 'FINAL', 'FPRINT' : 'REGIST', 'TAG' : 'REGIST', 'MATCH' : 'POSSIBLE'})
+    assert_fact('WEAPONMNG49', {'NUMBER' : '15', 'INSTALL' : 'FINAL', 'FPRINT' : 'REGIST', 'TAG' : 'REGIST', 'MATCH' : 'IMPOSSIBLE'})
